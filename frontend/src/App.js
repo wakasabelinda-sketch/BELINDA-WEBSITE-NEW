@@ -18,7 +18,8 @@ import {
   FileText, 
   Briefcase,
   ChevronDown,
-  MessageCircle
+  MessageCircle,
+  BookOpen
 } from "lucide-react";
 
 // Images from design guidelines
@@ -94,11 +95,24 @@ const FAQ_DATA = [
   }
 ];
 
+// Articles & publications
+// Add each article as an object, newest first, e.g.:
+// {
+//   title: "Article title",
+//   publication: "Where it was published (e.g. LinkedIn, Kenya Law Review)",
+//   date: "October 2026",
+//   category: "Corporate Law",
+//   summary: "One or two sentences describing the article.",
+//   url: "https://link-to-article"
+// }
+const PUBLICATIONS = [];
+
 // Navigation links
 const NAV_LINKS = [
   { href: "#home", label: "Home" },
   { href: "#about", label: "About" },
   { href: "#practice", label: "Practice Areas" },
+  { href: "#publications", label: "Publications" },
   { href: "#faq", label: "FAQ" },
   { href: "#contact", label: "Contact" }
 ];
@@ -223,12 +237,12 @@ const HeroSection = () => {
               Belinda Wakasa, Advocate of the High Court of Kenya
             </p>
             <h1 className="font-serif text-5xl md:text-6xl lg:text-7xl tracking-tighter leading-none font-bold text-legal-text">
-              Advocating for Truth & Corporate Excellence
+              Strategic Counsel for Corporate & Commercial Success
             </h1>
             <p className="font-sans text-base md:text-lg text-legal-text-muted leading-relaxed max-w-xl">
-              Providing exceptional legal representation in commercial disputes, corporate advisory, 
-              and property transactions across Kenya. Committed to protecting your interests with 
-              integrity and expertise.
+              Advising businesses, lenders and investors on transactions, governance, finance and 
+              commercial disputes across Kenya, with practical, commercially minded counsel that 
+              protects value and manages risk.
             </p>
           </div>
           
@@ -495,12 +509,89 @@ const PracticeAreasSection = () => {
   );
 };
 
+// Publications Section
+const PublicationsSection = () => {
+  return (
+    <section
+      id="publications"
+      className="py-24 md:py-32 bg-legal-bg-alt"
+      data-testid="publications-section"
+    >
+      <div className="px-6 md:px-12 lg:px-24 max-w-[1600px] mx-auto">
+        <div className="grid grid-cols-12 gap-12 mb-16">
+          <div className="col-span-12 lg:col-span-6 space-y-4">
+            <p className="font-sans text-xs uppercase tracking-[0.2em] font-medium text-legal-gold">
+              Insights
+            </p>
+            <h2 className="font-serif text-3xl md:text-4xl lg:text-5xl tracking-tight leading-tight text-legal-text">
+              Articles & Publications
+            </h2>
+          </div>
+          <div className="col-span-12 lg:col-span-6 flex items-end">
+            <p className="font-sans text-base text-legal-text-muted leading-relaxed">
+              Commentary on legal and regulatory developments affecting businesses in Kenya, 
+              from corporate governance and commercial contracts to banking, finance and property.
+            </p>
+          </div>
+        </div>
+
+        {PUBLICATIONS.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {PUBLICATIONS.map((item, index) => (
+              <a
+                key={index}
+                href={item.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="border border-legal-border bg-white p-8 bento-card flex flex-col gap-4 group"
+                data-testid={`publication-card-${index}`}
+              >
+                <p className="font-sans text-xs uppercase tracking-[0.15em] text-legal-gold">
+                  {item.category}
+                </p>
+                <h3 className="font-serif text-xl md:text-2xl leading-snug text-legal-text group-hover:text-legal-gold transition-colors">
+                  {item.title}
+                </h3>
+                <p className="font-sans text-sm text-legal-text-muted leading-relaxed flex-1">
+                  {item.summary}
+                </p>
+                <div className="flex items-center justify-between pt-4 border-t border-legal-border">
+                  <p className="font-sans text-xs text-legal-text-muted">
+                    {item.publication} · {item.date}
+                  </p>
+                  <ArrowRight className="w-4 h-4 text-legal-gold" />
+                </div>
+              </a>
+            ))}
+          </div>
+        ) : (
+          <div
+            className="border border-legal-border bg-white p-8 md:p-12 flex flex-col md:flex-row md:items-center gap-6"
+            data-testid="publications-empty"
+          >
+            <BookOpen className="w-10 h-10 text-legal-gold shrink-0" strokeWidth={1.5} />
+            <div className="space-y-2">
+              <h3 className="font-serif text-xl md:text-2xl text-legal-text">
+                New insights coming soon
+              </h3>
+              <p className="font-sans text-base text-legal-text-muted leading-relaxed">
+                Articles and legal updates will be published here. For a discussion on a specific 
+                issue, please get in touch.
+              </p>
+            </div>
+          </div>
+        )}
+      </div>
+    </section>
+  );
+};
+
 // FAQ Section
 const FAQSection = () => {
   return (
     <section
       id="faq"
-      className="py-24 md:py-32 bg-legal-bg-alt"
+      className="py-24 md:py-32"
       data-testid="faq-section"
     >
       <div className="px-6 md:px-12 lg:px-24 max-w-[1600px] mx-auto">
@@ -578,7 +669,7 @@ const ContactSection = () => {
   return (
     <section
       id="contact"
-      className="py-24 md:py-32"
+      className="py-24 md:py-32 bg-legal-bg-alt"
       data-testid="contact-section"
     >
       <div className="px-6 md:px-12 lg:px-24 max-w-[1600px] mx-auto">
@@ -876,6 +967,7 @@ function App() {
         <HeroSection />
         <AboutSection />
         <PracticeAreasSection />
+        <PublicationsSection />
         <FAQSection />
         <ContactSection />
       </main>
