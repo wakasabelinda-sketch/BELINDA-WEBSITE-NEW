@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import esgInKenyaBody from "@/articles/esgInKenya";
 import "@/App.css";
 import {
   Accordion,
@@ -19,7 +20,9 @@ import {
   Briefcase,
   ChevronDown,
   MessageCircle,
-  BookOpen
+  BookOpen,
+  ArrowLeft,
+  Download
 } from "lucide-react";
 
 // Images from design guidelines
@@ -105,7 +108,37 @@ const FAQ_DATA = [
 //   summary: "One or two sentences describing the article.",
 //   url: "https://link-to-article"
 // }
-const PUBLICATIONS = [];
+const PUBLICATIONS = [
+  {
+    slug: "esg-in-kenya",
+    title: "ESG in Kenya: From Voluntary Commitment to Legal Accountability",
+    subtitle: "What every board, business and advocate needs to know before IFRS S1 and S2 reporting begins on 1 January 2027.",
+    publication: "Article",
+    date: "October 2026",
+    readTime: "18 min read",
+    category: "Law & Governance",
+    summary: "ESG reporting becomes mandatory for Kenya's Public Interest Entities from 2027. The legal framework, recent court decisions and what boards should do now.",
+    url: "#/publications/esg-in-kenya",
+    download: "articles/esg-in-kenya/ESG-in-Kenya-Belinda-Wakasa.docx",
+    pillars: [
+      { letter: "E", name: "Environmental", text: "Emissions, water, waste, pollution, climate risk" },
+      { letter: "S", name: "Social", text: "Safety, labour, human rights, communities, data" },
+      { letter: "G", name: "Governance", text: "Board oversight, ethics, disclosure, assurance" }
+    ],
+    body: esgInKenyaBody
+  }
+];
+
+// Scroll to a homepage section, leaving an article page first if one is open
+const goToSection = (href) => {
+  const el = document.querySelector(href);
+  if (el) {
+    el.scrollIntoView({ behavior: "smooth" });
+    return;
+  }
+  window.location.hash = "";
+  setTimeout(() => document.querySelector(href)?.scrollIntoView({ behavior: "smooth" }), 80);
+};
 
 // Navigation links
 const NAV_LINKS = [
@@ -132,10 +165,7 @@ const Header = () => {
 
   const scrollToSection = (href) => {
     setIsMobileMenuOpen(false);
-    const element = document.querySelector(href);
-    if (element) {
-      element.scrollIntoView({ behavior: "smooth" });
-    }
+    goToSection(href);
   };
 
   return (
@@ -251,7 +281,7 @@ const HeroSection = () => {
               href="#contact"
               onClick={(e) => { 
                 e.preventDefault(); 
-                document.querySelector("#contact")?.scrollIntoView({ behavior: "smooth" }); 
+                goToSection("#contact"); 
               }}
               className="bg-legal-text text-white px-8 py-4 font-sans text-sm font-medium inline-flex items-center gap-2 btn-primary"
               data-testid="hero-cta-button"
@@ -402,7 +432,7 @@ const PracticeAreasSection = () => {
                 href="#contact"
                 onClick={(e) => { 
                   e.preventDefault(); 
-                  document.querySelector("#contact")?.scrollIntoView({ behavior: "smooth" }); 
+                  goToSection("#contact"); 
                 }}
                 className="inline-flex items-center gap-2 font-sans text-sm font-medium text-legal-gold hover:text-legal-gold-hover transition-colors"
                 data-testid="practice-commercial-link"
@@ -438,7 +468,7 @@ const PracticeAreasSection = () => {
                 href="#contact"
                 onClick={(e) => { 
                   e.preventDefault(); 
-                  document.querySelector("#contact")?.scrollIntoView({ behavior: "smooth" }); 
+                  goToSection("#contact"); 
                 }}
                 className="inline-flex items-center gap-2 font-sans text-sm font-medium text-legal-gold hover:text-legal-gold-hover transition-colors"
                 data-testid="practice-litigation-link"
@@ -466,7 +496,7 @@ const PracticeAreasSection = () => {
                 href="#contact"
                 onClick={(e) => { 
                   e.preventDefault(); 
-                  document.querySelector("#contact")?.scrollIntoView({ behavior: "smooth" }); 
+                  goToSection("#contact"); 
                 }}
                 className="inline-flex items-center gap-2 font-sans text-sm font-medium text-legal-gold hover:text-legal-gold-hover transition-colors"
                 data-testid="practice-conveyancing-link"
@@ -494,7 +524,7 @@ const PracticeAreasSection = () => {
                 href="#contact"
                 onClick={(e) => { 
                   e.preventDefault(); 
-                  document.querySelector("#contact")?.scrollIntoView({ behavior: "smooth" }); 
+                  goToSection("#contact"); 
                 }}
                 className="inline-flex items-center gap-2 font-sans text-sm font-medium text-legal-gold hover:text-legal-gold-hover transition-colors"
                 data-testid="practice-corporate-link"
@@ -541,8 +571,7 @@ const PublicationsSection = () => {
               <a
                 key={index}
                 href={item.url}
-                target="_blank"
-                rel="noopener noreferrer"
+                {...(item.url.startsWith("#") ? {} : { target: "_blank", rel: "noopener noreferrer" })}
                 className="border border-legal-border bg-white p-8 bento-card flex flex-col gap-4 group"
                 data-testid={`publication-card-${index}`}
               >
@@ -557,7 +586,7 @@ const PublicationsSection = () => {
                 </p>
                 <div className="flex items-center justify-between pt-4 border-t border-legal-border">
                   <p className="font-sans text-xs text-legal-text-muted">
-                    {item.publication} · {item.date}
+                    {item.date}{item.readTime ? ` · ${item.readTime}` : ` · ${item.publication}`}
                   </p>
                   <ArrowRight className="w-4 h-4 text-legal-gold" />
                 </div>
@@ -583,6 +612,104 @@ const PublicationsSection = () => {
         )}
       </div>
     </section>
+  );
+};
+
+// Article Page
+const ArticlePage = ({ article }) => {
+  const publicUrl = process.env.PUBLIC_URL || "";
+  const html = article.body.split("%PUBLIC%").join(publicUrl);
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    const previous = document.title;
+    document.title = `${article.title} | Belinda Wakasa Legal`;
+    return () => { document.title = previous; };
+  }, [article]);
+
+  return (
+    <article data-testid={`article-${article.slug}`}>
+      {/* Article header */}
+      <header className="pt-32 pb-16 md:pb-20 bg-legal-bg-alt">
+        <div className="px-6 md:px-12 lg:px-24 max-w-[1600px] mx-auto">
+          <div className="max-w-3xl space-y-6">
+            <a
+              href="#publications"
+              onClick={(e) => { e.preventDefault(); goToSection("#publications"); }}
+              className="inline-flex items-center gap-2 font-sans text-sm font-medium text-legal-gold hover:text-legal-gold-hover transition-colors"
+              data-testid="article-back-link"
+            >
+              <ArrowLeft className="w-4 h-4" /> All publications
+            </a>
+            <p className="font-sans text-xs uppercase tracking-[0.2em] font-medium text-legal-gold">
+              {article.category} · {article.date}
+            </p>
+            <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl tracking-tight leading-[1.1] font-bold text-legal-text">
+              {article.title}
+            </h1>
+            <p className="font-sans text-lg md:text-xl text-legal-text-muted leading-relaxed">
+              {article.subtitle}
+            </p>
+            <div className="flex flex-wrap items-center gap-x-8 gap-y-4 pt-4 border-t border-legal-border">
+              <div>
+                <p className="font-sans text-sm font-semibold text-legal-text">Belinda Wakasa</p>
+                <p className="font-sans text-sm text-legal-text-muted">Advocate of the High Court of Kenya</p>
+              </div>
+              <p className="font-sans text-sm text-legal-text-muted">{article.readTime}</p>
+              {article.download && (
+                <a
+                  href={`${publicUrl}/${article.download}`}
+                  download
+                  className="inline-flex items-center gap-2 border border-legal-text text-legal-text px-5 py-2.5 font-sans text-sm font-medium hover:bg-legal-text hover:text-white transition-colors"
+                  data-testid="article-download"
+                >
+                  <Download className="w-4 h-4" /> Download
+                </a>
+              )}
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* Pillars strip */}
+      {article.pillars && (
+        <div className="px-6 md:px-12 lg:px-24 max-w-[1600px] mx-auto -mt-8">
+          <div className="max-w-3xl grid grid-cols-1 sm:grid-cols-3 border border-legal-border bg-white">
+            {article.pillars.map((p, i) => (
+              <div key={p.letter} className={`p-6 ${i > 0 ? "border-t sm:border-t-0 sm:border-l border-legal-border" : ""}`}>
+                <p className="font-serif text-3xl font-bold text-legal-gold">{p.letter}</p>
+                <p className="font-sans text-sm font-semibold text-legal-text mt-2">{p.name}</p>
+                <p className="font-sans text-sm text-legal-text-muted mt-1 leading-relaxed">{p.text}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Body */}
+      <div className="px-6 md:px-12 lg:px-24 max-w-[1600px] mx-auto py-16 md:py-20">
+        <div
+          className="max-w-3xl article-body"
+          dangerouslySetInnerHTML={{ __html: html }}
+        />
+        <div className="max-w-3xl mt-16 pt-8 border-t border-legal-border flex flex-wrap gap-4">
+          <a
+            href="#contact"
+            onClick={(e) => { e.preventDefault(); goToSection("#contact"); }}
+            className="bg-legal-text text-white px-8 py-4 font-sans text-sm font-medium inline-flex items-center gap-2 btn-primary"
+          >
+            Discuss this with Belinda <ArrowRight className="w-4 h-4" />
+          </a>
+          <a
+            href="#publications"
+            onClick={(e) => { e.preventDefault(); goToSection("#publications"); }}
+            className="border border-legal-text text-legal-text px-8 py-4 font-sans text-sm font-medium inline-flex items-center gap-2 hover:bg-legal-text hover:text-white transition-colors"
+          >
+            <ArrowLeft className="w-4 h-4" /> All publications
+          </a>
+        </div>
+      </div>
+    </article>
   );
 };
 
@@ -862,7 +989,7 @@ const Footer = () => {
                   href={link.href}
                   onClick={(e) => { 
                     e.preventDefault(); 
-                    document.querySelector(link.href)?.scrollIntoView({ behavior: "smooth" }); 
+                    goToSection(link.href); 
                   }}
                   className="font-sans text-sm text-white/70 hover:text-legal-gold transition-colors"
                   data-testid={`footer-${link.label.toLowerCase()}-link`}
@@ -885,7 +1012,7 @@ const Footer = () => {
                   href="#practice"
                   onClick={(e) => { 
                     e.preventDefault(); 
-                    document.querySelector("#practice")?.scrollIntoView({ behavior: "smooth" }); 
+                    goToSection("#practice"); 
                   }}
                   className="font-sans text-sm text-white/70 hover:text-legal-gold transition-colors"
                   data-testid={`footer-practice-${area.id}-link`}
@@ -959,17 +1086,36 @@ const WhatsAppButton = () => {
 };
 
 // Main App Component
+const getArticleFromHash = () => {
+  const match = window.location.hash.match(/^#\/publications\/([\w-]+)/);
+  return match ? PUBLICATIONS.find((p) => p.slug === match[1]) || null : null;
+};
+
 function App() {
+  const [article, setArticle] = useState(getArticleFromHash);
+
+  useEffect(() => {
+    const onHashChange = () => setArticle(getArticleFromHash());
+    window.addEventListener("hashchange", onHashChange);
+    return () => window.removeEventListener("hashchange", onHashChange);
+  }, []);
+
   return (
     <div className="bg-legal-bg min-h-screen">
       <Header />
       <main>
-        <HeroSection />
-        <AboutSection />
-        <PracticeAreasSection />
-        <PublicationsSection />
-        <FAQSection />
-        <ContactSection />
+        {article ? (
+          <ArticlePage article={article} />
+        ) : (
+          <>
+            <HeroSection />
+            <AboutSection />
+            <PracticeAreasSection />
+            <PublicationsSection />
+            <FAQSection />
+            <ContactSection />
+          </>
+        )}
       </main>
       <Footer />
       <WhatsAppButton />
