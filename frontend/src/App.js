@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import esgInKenyaBody from "@/articles/esgInKenya";
+import { PUBLICATIONS } from "@/articles/publications";
 import "@/App.css";
 import {
   Accordion,
@@ -98,37 +98,6 @@ const FAQ_DATA = [
   }
 ];
 
-// Articles & publications
-// Add each article as an object, newest first, e.g.:
-// {
-//   title: "Article title",
-//   publication: "Where it was published (e.g. LinkedIn, Kenya Law Review)",
-//   date: "October 2026",
-//   category: "Corporate Law",
-//   summary: "One or two sentences describing the article.",
-//   url: "https://link-to-article"
-// }
-const PUBLICATIONS = [
-  {
-    slug: "esg-in-kenya",
-    title: "ESG in Kenya: From Voluntary Commitment to Legal Accountability",
-    subtitle: "What every board, business and advocate needs to know before IFRS S1 and S2 reporting begins on 1 January 2027.",
-    publication: "Article",
-    date: "October 2026",
-    readTime: "18 min read",
-    category: "Law & Governance",
-    summary: "ESG reporting becomes mandatory for Kenya's Public Interest Entities from 2027. The legal framework, recent court decisions and what boards should do now.",
-    url: "#/publications/esg-in-kenya",
-    download: "articles/esg-in-kenya/ESG-in-Kenya-Belinda-Wakasa.docx",
-    pillars: [
-      { letter: "E", name: "Environmental", text: "Emissions, water, waste, pollution, climate risk" },
-      { letter: "S", name: "Social", text: "Safety, labour, human rights, communities, data" },
-      { letter: "G", name: "Governance", text: "Board oversight, ethics, disclosure, assurance" }
-    ],
-    body: esgInKenyaBody
-  }
-];
-
 // Scroll to a homepage section, leaving an article page first if one is open
 const goToSection = (href) => {
   const el = document.querySelector(href);
@@ -136,8 +105,8 @@ const goToSection = (href) => {
     el.scrollIntoView({ behavior: "smooth" });
     return;
   }
-  window.location.hash = "";
-  setTimeout(() => document.querySelector(href)?.scrollIntoView({ behavior: "smooth" }), 80);
+  // On an article page: return to the homepage at the requested section
+  window.location.href = `/${href}`;
 };
 
 // Navigation links
@@ -571,7 +540,7 @@ const PublicationsSection = () => {
               <a
                 key={index}
                 href={item.url}
-                {...(item.url.startsWith("#") ? {} : { target: "_blank", rel: "noopener noreferrer" })}
+                {...(item.url.startsWith("http") ? { target: "_blank", rel: "noopener noreferrer" } : {})}
                 className="border border-legal-border bg-white p-8 bento-card flex flex-col gap-4 group"
                 data-testid={`publication-card-${index}`}
               >
@@ -1086,19 +1055,20 @@ const WhatsAppButton = () => {
 };
 
 // Main App Component
-const getArticleFromHash = () => {
-  const match = window.location.hash.match(/^#\/publications\/([\w-]+)/);
+// Articles live at /publications/<slug>/ (a static page is pre-rendered for each at build time)
+const getArticleFromPath = () => {
+  const match = window.location.pathname.match(/^\/publications\/([\w-]+)\/?$/);
   return match ? PUBLICATIONS.find((p) => p.slug === match[1]) || null : null;
 };
 
-function App() {
-  const [article, setArticle] = useState(getArticleFromHash);
+// Old links used #/publications/<slug>; send them to the article's real address
+const legacyHash = window.location.hash.match(/^#\/publications\/([\w-]+)/);
+if (legacyHash && PUBLICATIONS.some((p) => p.slug === legacyHash[1])) {
+  window.location.replace(`/publications/${legacyHash[1]}/`);
+}
 
-  useEffect(() => {
-    const onHashChange = () => setArticle(getArticleFromHash());
-    window.addEventListener("hashchange", onHashChange);
-    return () => window.removeEventListener("hashchange", onHashChange);
-  }, []);
+function App() {
+  const [article] = useState(getArticleFromPath);
 
   return (
     <div className="bg-legal-bg min-h-screen">
