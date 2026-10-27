@@ -597,7 +597,10 @@ const ArticlePage = ({ article }) => {
   }, [article]);
 
   return (
-    <article data-testid={`article-${article.slug}`}>
+    <article
+      data-testid={`article-${article.slug}`}
+      className={article.theme ? `article-theme-${article.theme}` : undefined}
+    >
       {/* Article header */}
       <header className="pt-32 pb-16 md:pb-20 bg-legal-bg-alt">
         <div className="px-6 md:px-12 lg:px-24 max-w-[1600px] mx-auto">
