@@ -45,7 +45,7 @@ const pages = [{ loc: `${SITE}/`, lastmod: today, priority: "1.0" }];
 for (const a of PUBLICATIONS) {
   if (!a.slug || !a.body) continue; // external articles have no page here
   const url = `${SITE}/publications/${a.slug}/`;
-  const title = `${a.title} | Belinda Wakasa`;
+  const title = `${a.seoTitle || a.title} | Belinda Wakasa`;
   const description = a.summary || a.subtitle || "";
   const body = a.body.split("%PUBLIC%").join("");
 
@@ -72,10 +72,21 @@ for (const a of PUBLICATIONS) {
     mainEntityOfPage: url,
     inLanguage: "en-GB"
   };
-  html = html.replace(
-    "</head>",
-    `<script type="application/ld+json">${JSON.stringify(jsonLd).replace(/</g, "\\u003c")}</script></head>`
-  );
+  const ld = (obj) => `<script type="application/ld+json">${JSON.stringify(obj).replace(/</g, "\\u003c")}</script>`;
+  let head = ld(jsonLd);
+  if (a.keywords) head = `<meta name="keywords" content="${esc(a.keywords)}">` + head;
+  if (Array.isArray(a.faq) && a.faq.length) {
+    head += ld({
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      mainEntity: a.faq.map((f) => ({
+        "@type": "Question",
+        name: f.q,
+        acceptedAnswer: { "@type": "Answer", text: f.a }
+      }))
+    });
+  }
+  html = html.replace("</head>", `${head}</head>`);
 
   // Article text in the HTML itself; React replaces it with the styled page on load
   const content =
